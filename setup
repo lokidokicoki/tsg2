@@ -1,0 +1,10 @@
+#!/bin/bash
+
+PWD=$(pwd)
+LINK="/var/www/tsg2"
+if [ ! -e $LINK ]; then 
+	sudo ln -s $PWD $LINK
+	echo 'Made link'
+else
+	echo 'Have link'
+fi

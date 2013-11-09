@@ -1,0 +1,6 @@
+#!/bin/bash
+
+LINK="/var/www/tsg2"
+if [ -e $LINK ]; then 
+	sudo rm $LINK
+fi
