@@ -2,6 +2,7 @@ use tsg2db;
 
 create table if not exists thing (
 	thingID integer not null auto_increment,
+	userID char(255) not null,
 	posx integer not null,
 	posy integer not null,
 	age integer,
@@ -9,6 +10,6 @@ create table if not exists thing (
 	energy float(10,2),
 	genes text,
 	ancestors text,
-	primary key (thingID),
+	primary key (thingID, userID),
 	index thing_idx (posx,posy)
 );
