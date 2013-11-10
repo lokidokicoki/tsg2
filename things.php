@@ -7,27 +7,28 @@ function testThings($con,$user){
 
 	// GOING THROUGH THE DATA
 	if($result->num_rows > 0) {
+		$html .= '<div id="control"><p id="results">';
 		while($row = $result->fetch_assoc()) {
 			$html.= stripslashes($row['thingID']);	
 		}
-		$html .= '<form id="run"><input type="submit" value="Run"></form>';
+		$html .= '</p><form id="run"><input type="submit" value="Run"></form></p></div>';
 	}
 	else {
-		$html .= '<p>NO RESULTS</p><p><form action="/" id="create"><input type="submit" value="Create"/></form></p>';	
+		$html .= '<div id="control"><p id="results">NO RESULTS</p><p><form id="create"><input type="submit" value="Create"/></form></p></div>';	
 	}
 
 	return $html;
 }
 
-function createThings($con, $user){
+function createThings($con, $user, $w, $h){
 	$query = "insert into thing (userID, posx, posy, age, direction, energy, genes, ancestors) values ";
 
-	for ($i=0; $i<=20; $i++){
+	for ($i=0; $i<19; $i++){
 		if ($i>0){
 			$query .= ",";
 		}
-		$posx = rand(0,600);
-		$posy = rand(0,300);
+		$posx = rand(0,$w);
+		$posy = rand(0,$h);
 		$age=0;
 		$energy = 300;
 		$direction=0;
@@ -43,6 +44,32 @@ function createThings($con, $user){
 	return getThings($con, $user);
 }
 
+function incubateThings($con, $user, $w, $h){
+	$things = getThings($con, $user);
+
+	$sql = "update `thing` set `posx`=%s, `posy`=%s where `thingID`=%s";
+	// modify things in place, hence &$thing;
+	foreach($things as $key => $thing){
+		$x = $thing['posx'] + rand(0,5)*(rand(0,1)*2-1);
+		if ($x < 0)
+			$x=0;
+		elseif ($x > $w)
+			$x=$w;
+		$things[$key]['posx'] = $x;
+
+		$y = $thing['posy'] + rand(0,5)*(rand(0,1)*2-1);
+		if ($y < 0)
+			$y=0;
+		elseif ($y > $h)
+			$y=$h;
+		$things[$key]['posy'] = $y;
+		$query = sprintf($sql,$things[$key]['posx'], $things[$key]['posy'], $things[$key]['thingID']);
+		$con->query($query) or die($con->error.__LINE__);
+	}
+
+	return $things;
+}
+
 function getThings($con, $user){
 	$query = "SELECT * FROM `thing` where userID='$user'";
 	$result = $con->query($query) or die($con->error.__LINE__);
@@ -51,6 +78,11 @@ function getThings($con, $user){
 	if($result->num_rows > 0) {
 		while($row = $result->fetch_assoc()) {
 			$row['genes'] = json_decode($row['genes']);
+			$row['posx'] = (int)$row['posx'];
+			$row['posy'] = (int)$row['posy'];
+			$row['age'] = (int)$row['age'];
+			$row['direction'] = (int)$row['direction'];
+			$row['energy'] = (float)$row['energy'];
 
 			array_push($things, $row);
 		}
