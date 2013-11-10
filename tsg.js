@@ -34,7 +34,7 @@ function draw(data){
 	if (data && data !== undefined){
 		if (data.things){
 			for(var i=0,len=data.things.length;i<len;i++){
-				console.debug(data.things[i]);
+				//console.debug(data.things[i]);
 				var thing = data.things[i];
 				var select = 0;
 				var kid = 0;
