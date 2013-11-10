@@ -1,27 +1,13 @@
 <?php
-function getConn(){
-	$dbname="tsg2db";
-	$dbhost="localhost";
-	$dbuser="tsg2user";
-	$dbpass="kantara12";
-	$con=new mysqli($dbhost,$dbuser,$dbpass,$dbname);
-	if (mysqli_connect_errno()){
-		printf('Connection failed');
-		exit();
-	}	
-	return $con;
-}
-
-function closeConn($con){
-	if($con){
-		mysqli_close($con);
-	}
-}
+include ("db.php");
+include ("things.php");
 
 function openTemplate (){
 	$html = '<html>
 <head>
 	<title>LDC-TSG2</title>
+	<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+	<script src="tsg.js"></script>
 	<link rel="stylesheet" href="css/style.css"/>
 </head>
 <body>
@@ -35,27 +21,6 @@ function openTemplate (){
 function closeTemplate(){
 	$html = '</body>
 </html>';
-	return $html;
-}
-
-function getThings($con){
-	if (! $con){
-		$con = getConn();
-	}
-	// A QUICK QUERY ON A FAKE USER TABLE
-	$query = "SELECT * FROM `thing`";
-	$result = $con->query($query) or die($con->error.__LINE__);
-
-	// GOING THROUGH THE DATA
-	if($result->num_rows > 0) {
-		while($row = $result->fetch_assoc()) {
-			$html.= stripslashes($row['thingID']);	
-		}
-	}
-	else {
-		$html .= '<p>NO RESULTS</p>';	
-	}
-
 	return $html;
 }
 
