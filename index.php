@@ -24,11 +24,22 @@ function closeTemplate(){
 	return $html;
 }
 
+$user='';
+$fragment="existing user";
+if (isset($_COOKIE["LDCTSG2UID"])){
+	$user=$_COOKIE["LDCTSG2UID"];
+} else{
+	$user = uniqid('UID_');
+   	$expire=time()+60*60*24*30;
+	setcookie("LDCTSG2UID", $user, $expire);
+	$fragment="new user";
+}
 $html = openTemplate();
 
 $con = getConn();
-$html .= getThings($con);
+$html .= testThings($con,$user);
 closeConn($con);
+$html .= $fragment;
 $html .= closeTemplate();
 echo $html;
 ?>
