@@ -13,7 +13,7 @@ function openTemplate (){
 <body>
 <h2>Things, Stuff and Gack 2.0</h2>
 <div>
-<canvas id="petri"></canvas>
+<canvas id="petri" width="600" height="300"></canvas>
 </div>';
 	return $html;
 }
