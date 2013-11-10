@@ -20,17 +20,23 @@ function testThings($con,$user){
 }
 
 function createThings($con, $user){
-	// only create 1 thing at present
-	$posx = rand(0,300);
-	$posy = rand(0,200);
-	$age=0;
-	$energy = 300;
-	$direction=0;
-	$ancestors='';
-	$genes=json_encode(array('speed'=>1, 'tumble'=>10, 'hunt'=>30, 'efficiency'=>1));
+	$query = "insert into thing (userID, posx, posy, age, direction, energy, genes, ancestors) values ";
 
-	$query = "insert into thing (userID, posx, posy, age, direction, energy, genes, ancestors) ".
-	   "values ('$user', '$posx', '$posy', '$age', '$direction', '$energy', '$genes', '$ancestors')";
+	for ($i=0; $i<=20; $i++){
+		if ($i>0){
+			$query .= ",";
+		}
+		$posx = rand(0,600);
+		$posy = rand(0,300);
+		$age=0;
+		$energy = 300;
+		$direction=0;
+		$ancestors='';
+		$genes=json_encode(array('speed'=>1, 'tumble'=>10, 'hunt'=>30, 'efficiency'=>1));
+
+		$query .=" ('$user', $posx, $posy, $age, $direction, $energy, '$genes', '$ancestors')";
+
+	}
 
 	$con->query($query) or die($con->error.__LINE__);
 
