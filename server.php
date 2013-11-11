@@ -10,6 +10,7 @@ if(isset($_POST["action"]) && !empty($_POST["action"])){
 	$h=300;
 	switch($action){
 	case "create":
+		thingsTable($con);
 		$things = createThings($con, $user, $w, $h);
 		$retval = array('things'=>$things, 'control'=>'<p id="results">Have Things</p><form id="run"><input type="submit" value="Run"/></form>');
 		echo json_encode($retval);

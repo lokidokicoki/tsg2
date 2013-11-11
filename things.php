@@ -1,5 +1,27 @@
 <?php
+
+function thingsTable($con){
+	$query="create table if not exists thing (
+	thingID integer not null auto_increment,
+	userID char(255) not null,
+	posx integer not null,
+	posy integer not null,
+	age integer,
+	direction integer,
+	energy float(10,2),
+	genes text,
+	ancestors text,
+	primary key (thingID, userID),
+	index thing_idx (posx,posy)
+);";
+	$result = $con->query($query) or die($con->error.__LINE__);
+}
+
 function testThings($con,$user){
+	if($con->query("SHOW TABLES LIKE 'thing'")->num_rows == 0){
+		thingsTable($con);
+	}
+
 	// A QUICK QUERY ON A FAKE USER TABLE
 	$query = "SELECT * FROM `thing` where userID='$user'";
 	$result = $con->query($query) or die($con->error.__LINE__);

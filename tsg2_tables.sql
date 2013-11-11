@@ -1,4 +1,4 @@
-use tsg2db;
+use lokidoki_tsg2;
 
 create table if not exists thing (
 	thingID integer not null auto_increment,
