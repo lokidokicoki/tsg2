@@ -1,5 +1,6 @@
 $(document).ready(function(){
 var running = false;
+$('#petri').on('click', click);
 //handle thing creation
 $('#create').submit(function(event){
 	
@@ -43,7 +44,10 @@ function run(event){
 		draw(data);
 
 		if(running){
+			$('#runPause').attr('value', 'Pause');
 			setTimeout(run, 500);
+		}else{
+			$('#runPause').attr('value', 'Run');
 		}
 		
 	})
@@ -90,5 +94,27 @@ function draw(data){
 			}
 		}
 	}
+};
+
+function click(e){
+	var x = e.offsetX - 2;
+	var y = e.offsetY - 2;
+	$('#clicked').text(x+','+y);
+	running = false;
+	// fire off the request to /server.php
+    $.post("server.php",{action:"info", x:x, y:y}, 'json')
+	.done(function (data){
+//		console.log('done pre data:'+data);
+		data = $.parseJSON(data);
+//		console.log('done post data:'+data);
+		//draw(data);
+		if (data && data !== undefined && data.length > 0){
+			$('#thingID').text(data[0].thingID);
+		}
+
+	})
+	.fail(function () {
+		console.error('run fail');
+	});
 };
 });

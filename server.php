@@ -20,6 +20,10 @@ if(isset($_POST["action"]) && !empty($_POST["action"])){
 		$retval = array('things'=>$things);
 		echo json_encode($retval);
 		break;
+	case "info":
+		$thing = getThingAtCoords($con, $user, $_POST["x"], $_POST["y"]);
+		echo json_encode($thing);
+		break;
 	default:
 		echo "unknown action".$action;
 		break;

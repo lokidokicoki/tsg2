@@ -30,13 +30,24 @@ function testThings($con,$user){
 	// GOING THROUGH THE DATA
 	if($result->num_rows > 0) {
 		$html .= '<div id="control"><p id="results">';
-		while($row = $result->fetch_assoc()) {
-			$html.= stripslashes($row['thingID']);	
-		}
-		$html .= '</p><form id="run"><input type="submit" value="Run"></form></p></div>';
+		$html .= 'Have Things';
+		$html .= '</p><form id="run"><input id="runPause" type="submit" value="Run"></form></p><div id="clicked">0,0</div>'.
+			'<div id="info">
+				<span>Thing Info</span>
+				<span id="thingID">0</span>
+			</div>'.
+			'</div>';
 	}
 	else {
-		$html .= '<div id="control"><p id="results">NO RESULTS</p><p><form id="create"><input type="submit" value="Create"/></form></p></div>';	
+		$html .= '<div id="control">'.
+			'<p id="results">NO RESULTS</p>'.
+			'<p><form id="create"><input type="submit" value="Create"/></form></p>'.
+			'<div id="clicked">0,0</div>'.
+			'<div id="info">
+				<span>Thing Info</span>
+				<span id="thingID">0</span>
+			</div>'.
+			'</div>';	
 	}
 
 	return $html;
@@ -94,6 +105,30 @@ function incubateThings($con, $user, $w, $h){
 
 function getThings($con, $user){
 	$query = "SELECT * FROM `thing` where userID='$user'";
+	$result = $con->query($query) or die($con->error.__LINE__);
+	$things = array();
+	// loop over return results, decode genes, push to $things fro return
+	if($result->num_rows > 0) {
+		while($row = $result->fetch_assoc()) {
+			$row['genes'] = json_decode($row['genes']);
+			$row['posx'] = (int)$row['posx'];
+			$row['posy'] = (int)$row['posy'];
+			$row['age'] = (int)$row['age'];
+			$row['direction'] = (int)$row['direction'];
+			$row['energy'] = (float)$row['energy'];
+
+			array_push($things, $row);
+		}
+	}
+	return $things;
+}
+
+function getThingAtCoords($con, $user, $x, $y){
+	$xmin = $x-5;
+	$xmax = $x+5;
+	$ymin = $y-5;
+	$ymax = $y+5;
+	$query = "SELECT * FROM `thing` where userID='$user' and posx>=$xmin and posx<=$xmax and posy>=$ymin and posy <= $ymax";
 	$result = $con->query($query) or die($con->error.__LINE__);
 	$things = array();
 	// loop over return results, decode genes, push to $things fro return

@@ -27,9 +27,10 @@ function closeTemplate(){
 }
 
 $user='';
-$fragment="existing user";
+$fragment="existing user ";
 if (isset($_COOKIE["LDCTSG2UID"])){
 	$user=$_COOKIE["LDCTSG2UID"];
+	$fragment .= $user;
 } else{
 	$user = uniqid('UID_');
    	$expire=time()+60*60*24*30;
