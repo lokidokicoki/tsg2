@@ -3,6 +3,8 @@ ini_set('display_errors', 'On');
 error_reporting(E_ALL | E_STRICT);
 include ("db.php");
 include ("things.php");
+include ("stuff.php");
+		
 
 function openTemplate (){
 	$html = '<html>
@@ -41,6 +43,7 @@ $html = openTemplate();
 
 $con = getConn();
 $html .= testThings($con,$user);
+testStuff($con, $user, 600, 300);
 closeConn($con);
 $html .= $fragment;
 $html .= closeTemplate();
