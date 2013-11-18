@@ -1,0 +1,17 @@
+{
+	"strict" : true,
+	"curly" : true,
+	"eqeqeq" : true,
+	"qutomark" : true,
+	"undef" : true,
+	"unused" : true,
+	"trailing" : true,
+	"smarttabs" : true,
+	"maxparams" : 5,
+	"maxdepth" : 5,
+	"maxcomplexity" : 10,
+	"quotmark" : "single",
+	"browser" : true,
+	"jquery" : true,
+	"devel" : true
+}
