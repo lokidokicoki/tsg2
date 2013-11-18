@@ -1,12 +1,15 @@
 var running = false;
+var selectedID = 0;
+
 function run(event){
+	'use strict';
 	console.log('run');
-    // prevent default posting of form
-	if (event && event != undefined){
-    	event.preventDefault();
+	// prevent default posting of form
+	if (event && event !== undefined){
+		event.preventDefault();
 	}
 	// fire off the request to /server.php
-    $.post("server.php",{action:"run"}, 'json')
+	$.post('server.php',{action:'run'}, 'json')
 	.done(function (data){
 		//console.log('done pre data:'+data);
 		data = $.parseJSON(data);
@@ -26,109 +29,130 @@ function run(event){
 	});
 }
 
-function draw(data){
-	var canvas = document.getElementById('petri');
-	var ctx = canvas.getContext('2d');
-	//reset canvas
-	canvas.width=canvas.width;
-	var scale = 1;
-	var rad360 = Math.PI * 2;
-
-	if (data && data !== undefined){
-		ctx.fillStyle = "rgb(0,128,0)";
-		if (data.stuff){
-			for(var x=0,xlen=data.stuff.length;x<xlen;x++){
-				for(var y=0, ylen=data.stuff[x].length; y<ylen; y++){
-					if (data.stuff[x][y] === 1){ 
-						ctx.fillRect(x, y, 1, 1);
-					}
-				}
-			}
-		}
-
-		if (data.things){
-			for(var i=0,len=data.things.length;i<len;i++){
-				//console.debug(data.things[i]);
-				var thing = data.things[i];
-				var select = 0;
-				var kid = 0;
-				var fill='';
-				var energy = thing.energy;
-
-				// get selected status....
-				if (thing.selected){
-					select = 255;
-				}
-				if (thing.kid){
-					kid = 255;
-				}
-
-				// colour dependant on energy value
-				if (energy > 200) {
-					ctx.fillStyle = "rgb(255,"+kid+","+select+")";
-				}else if (energy > 100) { 
-					ctx.fillStyle = "rgb(128,"+kid+","+select+")";
-				}else{
-					ctx.fillStyle = "rgb(64,"+kid+","+select+")";
-				}
-
-				// render things as a square
-				// thing x,y is position of 'mouth'
-				ctx.fillRect(thing.posx - 1,thing.posy - 1, 3, 3);
+function drawStuff (ctx, data) {
+	'use strict';
+	// stuff is green!
+	ctx.fillStyle = 'rgb(0,128,0)';
+	for(var x=0,xlen=data.stuff.length;x<xlen;x++){
+		for(var y=0, ylen=data.stuff[x].length; y<ylen; y++){
+			if (data.stuff[x][y] === 1){
+				ctx.fillRect(x, y, 1, 1);
 			}
 		}
 	}
-};
+}
+
+function drawThings (ctx, data) {
+	'use strict';
+	for(var i=0,len=data.things.length;i<len;i++){
+		//console.debug(data.things[i]);
+		var thing = data.things[i];
+		var select = 0;
+		var kid = 0;
+		var energy = thing.energy;
+
+		// get selected status....
+		if (selectedID && thing.thingID === selectedID){
+			select = 255;
+		}
+
+		if (thing.kid){
+			kid = 255;
+		}
+
+		// colour dependant on energy value
+		if (energy > 200) {
+			ctx.fillStyle = 'rgb(255,'+kid+','+select+')';
+		}else if (energy > 100) {
+			ctx.fillStyle = 'rgb(128,'+kid+','+select+')';
+		}else{
+			ctx.fillStyle = 'rgb(64,'+kid+','+select+')';
+		}
+
+		// render things as a square
+		// thing x,y is position of 'mouth'
+		ctx.fillRect(thing.posx - 1,thing.posy - 1, 3, 3);
+	}
+}
+
+
+/**
+ * Wrapper function around stuff & thing draw functions.
+ * @param data jqXHR result
+ */
+function draw (data){
+	'use strict';
+	var canvas = $('#petri')[0];
+	var ctx = canvas.getContext('2d');
+	//reset canvas
+	canvas.width=canvas.width;
+
+	if (!data || data === undefined){
+		return;
+	}
+
+	if (data.stuff){
+		drawStuff(ctx, data);
+	}
+
+	if (data.things){
+		drawThings(ctx, data);
+	}
+}
 
 function click(e){
+	'use strict';
 	var x = e.offsetX - 2;
 	var y = e.offsetY - 2;
 	$('#clicked').text(x+','+y);
 	running = false;
 	// fire off the request to /server.php
-    $.post("server.php",{action:"info", x:x, y:y}, 'json')
+	$.post('server.php',{action:'info', x:x, y:y}, 'json')
 	.done(function (data){
 //		console.log('done pre data:'+data);
 		data = $.parseJSON(data);
 //		console.log('done post data:'+data);
 		//draw(data);
+		selectedID = null;
 		if (data && data !== undefined && data.length > 0){
-			$('#thingID').text(data[0].thingID);
+			selectedID = data[0].thingID;
+			$('#thingID').text(selectedID);
 		}
 
 	})
 	.fail(function () {
 		console.error('run fail');
 	});
-};
+}
+
 $(document).ready(function(){
-$('#petri').on('click', click);
-//handle thing creation
-$('#create').submit(function(event){
+	'use strict';
+	$('#petri').on('click', click);
+	//handle thing creation
+	$('#create').submit(function(event){
 	
-    // prevent default posting of form
-    event.preventDefault();
-	// fire off the request to /server.php
-    $.post("server.php",{action:"create"}, 'json')
-	.done(function (data){
-		//console.log('done pre data:'+data);
-		data = $.parseJSON(data);
-		//console.log('done post data:'+data);
-		draw(data);
+		// prevent default posting of form
+		event.preventDefault();
+		// fire off the request to /server.php
+		$.post('server.php',{action:'create'}, 'json')
+		.done(function (data){
+			//console.log('done pre data:'+data);
+			data = $.parseJSON(data);
+			//console.log('done post data:'+data);
+			draw(data);
 
-		$('#control').empty().html(data.control);
+			$('#control').empty().html(data.control);
 
-		//can't work out how to tell run to trigger...
-	})
-	.fail(function () {
-		console.error('fail');
+			//can't work out how to tell run to trigger...
+		})
+		.fail(function () {
+			console.error('fail');
+		});
 	});
-});
 
-//handle thing creation
-$('#run').submit(function(event){
-	running =!running;
-	run(event);
-});
-
+	//handle thing creation
+	$('#run').submit(function(event){
+		running =!running;
+		run(event);
+	});
 });
