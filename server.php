@@ -9,6 +9,7 @@ if(isset($_POST["action"]) && !empty($_POST["action"])){
 	$action = $_POST["action"];
 	$w=600;
 	$h=300;
+//	error_log($action);
 	switch($action){
 	case "create":
 		thingsTable($con);
@@ -19,8 +20,8 @@ if(isset($_POST["action"]) && !empty($_POST["action"])){
 		echo json_encode($retval);
 		break;
 	case "run":
+		$stuff = incubateStuff($con, $user, $w, $h);
 		$things = incubateThings($con, $user, $w, $h);
-		$stuff = getStuff($con, $user, $w, $h);
 		$retval = array('things'=>$things, 'stuff'=>$stuff);
 		echo json_encode($retval);
 		break;
