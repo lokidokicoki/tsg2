@@ -20,6 +20,14 @@ function thingsTable($con){
 	$result = $con->query($query) or die($con->error.__LINE__);
 }
 
+function thingInfo(){
+	return '<div id="info">
+		<span>Thing Info</span>
+		<span id="thingID">0</span>
+		<span id="energy">0</span>
+		<span id="pos">0</span>
+	</div>';
+}
 function testThings($con,$user){
 	if($con->query("SHOW TABLES LIKE 'thing'")->num_rows == 0){
 		thingsTable($con);
@@ -35,21 +43,13 @@ function testThings($con,$user){
 		$html .= '<div id="control"><p id="results">';
 		$html .= 'Have Things';
 		$html .= '</p><form id="run"><input id="runPause" type="submit" value="Run"></form></p><div id="clicked">0,0</div>'.
-			'<div id="info">
-				<span>Thing Info</span>
-				<span id="thingID">0</span>
-			</div>'.
+			thingInfo() .
 			'</div>';
 	}
 	else {
 		$html .= '<div id="control">'.
 			'<p id="results">NO RESULTS</p>'.
 			'<p><form id="create"><input type="submit" value="Create"/></form></p>'.
-			'<div id="clicked">0,0</div>'.
-			'<div id="info">
-				<span>Thing Info</span>
-				<span id="thingID">0</span>
-			</div>'.
 			'</div>';	
 	}
 
@@ -103,7 +103,7 @@ function incubateThings($con, $user, $w, $h){
 
 	// turn this into an 'object' keyed by the thing id
 
-	$sql = "update `thing` set `posx`=%s, `posy`=%s where `thingID`=%s";
+	$sql = "update `thing` set `posx`=%s, `posy`=%s, `energy`=%s where `thingID`=%s";
 	// modify things in place, hence &$thing;
 	foreach($things as $key => $thing){
 		//error_log('incubate '.$thing['thingID']);
@@ -126,7 +126,7 @@ function incubateThings($con, $user, $w, $h){
 			$y=$h;
 		$things[$key]['energy'] -= 2;
 		$things[$key]['posy'] = $y;
-		$query = sprintf($sql, $things[$key]['posx'], $things[$key]['posy'], $things[$key]['thingID']);
+		$query = sprintf($sql, $things[$key]['posx'], $things[$key]['posy'], $things[$key]['energy'], $things[$key]['thingID']);
 		$con->query($query) or die($con->error.__LINE__);
 	}
 
