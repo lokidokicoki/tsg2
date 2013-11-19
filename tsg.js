@@ -1,5 +1,17 @@
 var running = false;
 var selectedID = 0;
+var tick = 250;
+
+function updateInfo(thing) {
+	'use strict';
+	if (!thing || thing === undefined){
+		return;
+	}
+
+	$('#thingID').text(thing.thingID);
+	$('#energy').text(thing.energy);
+	$('#pos').text(thing.posx +','+ thing.posy);
+}
 
 function run(event){
 	'use strict';
@@ -18,7 +30,7 @@ function run(event){
 
 		if(running){
 			$('#runPause').attr('value', 'Pause');
-			setTimeout(run, 500);
+			setTimeout(run, tick);
 		}else{
 			$('#runPause').attr('value', 'Run');
 		}
@@ -37,10 +49,11 @@ function drawStuff (ctx, data) {
 			if (data.stuff[x][y] === 1){
 				ctx.fillStyle = 'rgb(0,128,0)';
 				ctx.fillRect(x, y, 1, 1);
-			}else if (data.stuff[x][y] === 2){
+			}
+			/*else if (data.stuff[x][y] === 2){
 				ctx.fillStyle = 'rgb(0,0,255)';
 				ctx.fillRect(x, y, 1, 1);
-			}
+			}*/
 		}
 	}
 }
@@ -57,6 +70,7 @@ function drawThings (ctx, data) {
 		// get selected status....
 		if (selectedID && thing.thingID === selectedID){
 			select = 255;
+			updateInfo(thing);
 		}
 
 		if (thing.kid){
@@ -119,7 +133,7 @@ function click(e){
 		selectedID = null;
 		if (data && data !== undefined && data.length > 0){
 			selectedID = data[0].thingID;
-			$('#thingID').text(selectedID);
+			updateInfo(data[0]);
 		}
 
 	})
