@@ -32,10 +32,13 @@ function run(event){
 function drawStuff (ctx, data) {
 	'use strict';
 	// stuff is green!
-	ctx.fillStyle = 'rgb(0,128,0)';
 	for(var x=0,xlen=data.stuff.length;x<xlen;x++){
 		for(var y=0, ylen=data.stuff[x].length; y<ylen; y++){
 			if (data.stuff[x][y] === 1){
+				ctx.fillStyle = 'rgb(0,128,0)';
+				ctx.fillRect(x, y, 1, 1);
+			}else if (data.stuff[x][y] === 2){
+				ctx.fillStyle = 'rgb(0,0,255)';
 				ctx.fillRect(x, y, 1, 1);
 			}
 		}
