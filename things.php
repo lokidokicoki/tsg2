@@ -1,5 +1,8 @@
 <?php
 
+/**
+ * Create thing table
+ */
 function thingsTable($con){
 	$query="create table if not exists thing (
 	thingID integer not null auto_increment,
@@ -22,7 +25,7 @@ function testThings($con,$user){
 		thingsTable($con);
 	}
 
-	// A QUICK QUERY ON A FAKE USER TABLE
+	// get thing count
 	$query = "SELECT * FROM `thing` where userID='$user'";
 	$result = $con->query($query) or die($con->error.__LINE__);
 	$html='';
@@ -80,9 +83,35 @@ function createThings($con, $user, $w, $h){
 function incubateThings($con, $user, $w, $h){
 	$things = getThings($con, $user);
 
+	// find things that are sat on top of 'stuff'. eat them!
+	$query=  "SELECT t.thingID as thingID, t.posx as x, t.posy as y FROM thing AS t JOIN stuff AS s ON t.userID = s.userID AND t.posx = s.x AND t.posy = s.y AND s.cell =1";
+	$sql = "update `stuff` set `cell`=2 where `x`=%d and `y`=%d and `userID`='%s'";
+	$result = $con->query($query) or die($con->error.__LINE__);
+	$target = array();
+	if ($result->num_rows > 0){
+		//error_log('eat stuff!');
+		while($row = $result->fetch_assoc()) {
+			$target[$row['thingID']] = $row;
+
+			//'kill' stuff at that location
+			//error_log($sql);
+			$query = sprintf($sql, $row['x'], $row['y'], $user);
+			//error_log($query);
+			$con->query($query) or die($con->error.__LINE__);
+		}
+	}
+
+	// turn this into an 'object' keyed by the thing id
+
 	$sql = "update `thing` set `posx`=%s, `posy`=%s where `thingID`=%s";
 	// modify things in place, hence &$thing;
 	foreach($things as $key => $thing){
+		//error_log('incubate '.$thing['thingID']);
+		if (isset($target[$thing['thingID']])){
+			//error_log('got thing in targets');
+			$things[$key]['energy'] += 5;
+		}
+		// simple random jiggling at present
 		$x = $thing['posx'] + rand(0,5)*(rand(0,1)*2-1);
 		if ($x < 0)
 			$x=0;
@@ -95,8 +124,9 @@ function incubateThings($con, $user, $w, $h){
 			$y=0;
 		elseif ($y > $h)
 			$y=$h;
+		$things[$key]['energy'] -= 2;
 		$things[$key]['posy'] = $y;
-		$query = sprintf($sql,$things[$key]['posx'], $things[$key]['posy'], $things[$key]['thingID']);
+		$query = sprintf($sql, $things[$key]['posx'], $things[$key]['posy'], $things[$key]['thingID']);
 		$con->query($query) or die($con->error.__LINE__);
 	}
 
