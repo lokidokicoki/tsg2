@@ -9,6 +9,10 @@ class Thing {
 	public $energy=0.0;
 	public $genes="";
 	public $ancestors = "";
+
+	public function repr() {
+		return 'Thing:'.$this->thingID . ' ' . $this->energy;
+	}
 }
 
 /**
@@ -37,11 +41,10 @@ function thingsTable($con){
 function thingInfo(){
 	return '<div id="info">
 		<span>Thing Info</span>
-		<span id="thingID">0</span>
-		<span id="energy">0</span>
-		<span id="age">0</span>
-		<span id="spawnTimer">0</span>
-		<span id="pos">0</span>
+		ID:<span id="thingID">0</span>
+		Energy:<span id="energy">0</span>
+		Age:<span id="age">0</span>
+		Pos:<span id="pos">0</span>
 	</div>';
 }
 
@@ -100,6 +103,23 @@ function createThings($con, $user, $w, $h){
 	return getThings($con, $user);
 }
 
+function addNewThings($con, $user, $newThings){
+	$doWrite = false;
+	$query = "insert into thing (userID, x, y, age, direction, energy, genes, ancestors) values ";
+	for($i=0; $i < (count($newThings)); $i++) {
+		$doWrite = true;
+		if ($i>0){
+			$query .= ",";
+		}
+		$thing = $newThings[$i];
+		$query .=" ('$user', $thing->x, $thing->y, $thing->age, $thing->direction, $thing->energy, '$thing->genes', '$thing->ancestors')";
+	}
+
+	if ($doWrite){
+		$con->query($query) or die($con->error.__LINE__);
+	}
+}
+
 /**
  * Make the things do something!
  * Called every 'tick'
@@ -110,6 +130,7 @@ function incubateThings($con, $user, $w, $h){
 	// find things that are sat on top of 'stuff'. eat them!
 	$query=  "SELECT t.thingID as thingID, t.x as x, t.y as y FROM thing AS t JOIN stuff AS s ON t.userID = s.userID AND t.x = s.x AND t.y = s.y AND s.cell =1";
 	$sql = "update `stuff` set `cell`=2 where `x`=%d and `y`=%d and `userID`='%s'";
+	$dead = "delete from `thing` where `thingID`=%s;";
 	$result = $con->query($query) or die($con->error.__LINE__);
 	$target = array();
 	$newThings = array();
@@ -127,7 +148,7 @@ function incubateThings($con, $user, $w, $h){
 	}
 
 	// turn this into an 'object' keyed by the thing id
-	$sql = "update `thing` set `x`=%s, `y`=%s, `energy`=%s where `thingID`=%s";
+	$sql = "update `thing` set `x`=%s, `y`=%s, `energy`=%s, `age`=%s where `thingID`=%s";
 	
 	// modify things in place, hence &$thing;
 	foreach($things as $key => $thing){
@@ -154,15 +175,36 @@ function incubateThings($con, $user, $w, $h){
 		// moving costs 2 points
 		$things[$key]['energy'] -= 2;
 
-		// let us see if we can spawn.
-		if (($thing['age']%10 == 0) && $thing['energy'] >= 50) {
-			// can spawn	
-		}
-		
+		if ($things[$key]['energy'] > 0 ){
+			// let us see if we can spawn.
+			if (($thing['age']%10 == 0) && $thing['energy'] >= 50) {
+				$things[$key]['energy'] -= 50;
+				// can spawn	
+				$t = new Thing;
+				$t->userID = $user;
+				$t->x = $thing['x'];
+				$t->y = $thing['y'];
+				$t->energy = 50;
+				$t->genes = $thing['genes'];
+				$t->genes = json_encode($t->genes);
+				$t->ancestors = "". $thing['thingID'];
+				$newThings[] = $t;
 
-		$query = sprintf($sql, $things[$key]['x'], $things[$key]['y'], $things[$key]['energy'], $things[$key]['thingID']);
-		$con->query($query) or die($con->error.__LINE__);
+			}
+			
+			$things[$key]['age'] += 1;
+
+			$query = sprintf($sql, $things[$key]['x'], $things[$key]['y'], $things[$key]['energy'], $things[$key]['age'], $things[$key]['thingID']);
+			$con->query($query) or die($con->error.__LINE__);
+		}else{
+			$dead = sprintf($dead, $things[$key]['thingID']);
+			$con->query($dead) or die($con->error.__LINE__);
+		}
 	}
+
+	addNewThings($con, $user, $newThings);
+
+	$things = getThings($con, $user);
 
 	return $things;
 }
@@ -178,7 +220,6 @@ function getThings($con, $user){
 			$row['x'] = (int)$row['x'];
 			$row['y'] = (int)$row['y'];
 			$row['age'] = (int)$row['age'];
-			$row['spawnTimer'] = (int)$row['spawnTimer'];
 			$row['direction'] = (int)$row['direction'];
 			$row['energy'] = (float)$row['energy'];
 
@@ -203,7 +244,6 @@ function getThingAtCoords($con, $user, $x, $y){
 			$row['x'] = (int)$row['x'];
 			$row['y'] = (int)$row['y'];
 			$row['age'] = (int)$row['age'];
-			$row['spawnTimer'] = (int)$row['spawnTimer'];
 			$row['direction'] = (int)$row['direction'];
 			$row['energy'] = (float)$row['energy'];
 
