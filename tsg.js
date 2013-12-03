@@ -10,7 +10,9 @@ function updateInfo(thing) {
 
 	$('#thingID').text(thing.thingID);
 	$('#energy').text(thing.energy);
-	$('#pos').text(thing.posx +','+ thing.posy);
+	$('#age').text(thing.age);
+	$('#spawnTimer').text(thing.spawnTimer);
+	$('#pos').text(thing.x +','+ thing.y);
 }
 
 function run(event){
@@ -88,7 +90,7 @@ function drawThings (ctx, data) {
 
 		// render things as a square
 		// thing x,y is position of 'mouth'
-		ctx.fillRect(thing.posx - 1,thing.posy - 1, 3, 3);
+		ctx.fillRect(thing.x - 1,thing.y - 1, 3, 3);
 	}
 }
 
