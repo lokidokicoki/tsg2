@@ -11,7 +11,6 @@ function updateInfo(thing) {
 	$('#thingID').text(thing.thingID);
 	$('#energy').text(thing.energy);
 	$('#age').text(thing.age);
-	$('#spawnTimer').text(thing.spawnTimer);
 	$('#pos').text(thing.x +','+ thing.y);
 }
 
@@ -30,6 +29,7 @@ function run(event){
 		//console.log('done post data:'+data);
 		draw(data);
 
+		$('#results').text('Have '+ data.things.length +' Things');
 		if(running){
 			$('#runPause').attr('value', 'Pause');
 			setTimeout(run, tick);

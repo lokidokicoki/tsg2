@@ -177,8 +177,8 @@ function incubateThings($con, $user, $w, $h){
 
 		if ($things[$key]['energy'] > 0 ){
 			// let us see if we can spawn.
-			if (($thing['age']%10 == 0) && $thing['energy'] >= 50) {
-				$things[$key]['energy'] -= 50;
+			if (($thing['age']%10 == 0) && $thing['energy'] >= 100) {
+				$things[$key]['energy'] -= 100;
 				// can spawn	
 				$t = new Thing;
 				$t->userID = $user;
